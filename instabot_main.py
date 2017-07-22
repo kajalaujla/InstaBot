@@ -321,11 +321,11 @@ def get_comment_id(user_name):
     return data.keys()
 
 
-def draw_a_chart():
+def draw_a_chart_example():
 
     labels = 'tag1','tag2','tag3','tag4'
     sizes = [15, 30, 45, 10]
-    explode = (0, 0, 0.1, 0)  # only "explode" the 3nd slice
+    explode = (0, 0, 0.1, 0)  # only "explode" the 3rd slice
 
     fig1, ax1 = plt.subplots()
     ax1.pie(sizes, explode=explode, labels=labels, autopct='%1.1f%%',
@@ -334,27 +334,41 @@ def draw_a_chart():
 
     plt.show()
 
-def get_recent_post(user_name):
+def get_recent_posts_tags_list (user_name):
 
     user_id = get_user_id(user_name)
     requested_url = base_url + "users/%s/media/recent/?access_token=%s" % (user_id, Access_Token)
     posts = requests.get(requested_url).json()['data']
     caption = []
+    '''
+    print collections.Counter(posts.split("#"))
+    return collections.Counter(posts.split())
+    '''
+
     for e in posts:
         caption.append(e['caption']['text'])
     print caption
+    caption = []
+    print len(caption)
+
     print collections.Counter(caption)
     return collections.Counter(caption)
 
 
+def get_user_interests_hashtag_based_chart():
 
 
+    #no idea how to complete this function  : -(  Need more time
 
-def get_hashtags():
 
-    text = "this#is#a#text"
-    print text.split('#')
-    return text.split('#')
+    '''
+    1.get a list of hashtags
+    2.write some code to count the maximum used tags
+    3.create a chart for most used hashtags
+    4.fetch information about user interests from analysis
+    :return: user interests
+    '''
+    return None
 
 def startbot():
     '''
@@ -380,9 +394,9 @@ def startbot():
     print "l.Search tag by Name"
     print "m.Print sentiments and Delete Comment"
     print "n.Get negative percentage of a word"
-    print "o.Draw a chart"
+    print "o.Draw a Example Pie-chart"
     print "p.Get Hashtags used by user"
-    print "q."
+    print "q.Get user's Interests"
     print "n.exit\n"
 
 
@@ -439,17 +453,17 @@ def startbot():
         get_comment_id(user_name)
         exit()
     if choice == "o" :
-        draw_a_chart()
+        draw_a_chart_example()
         exit()
     if choice == "x" :
         get_negative_percentage()
         exit()
     if choice == "p" :
         user_name = raw_input("Enter name :")
-        get_recent_post(user_name)
+        get_recent_posts_tags_list(user_name)
         exit()
     if choice == "q" :
-        get_hashtags()
+        get_user_interests_hashtag_based_chart()
         exit()
     elif choice == "z" :
         exit()
