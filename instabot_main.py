@@ -2,20 +2,19 @@ import requests
 import urllib
 from textblob import TextBlob
 from textblob.sentiments import NaiveBayesAnalyzer
+import matplotlib.pyplot as plt
+import collections
 
 Access_Token = "3540677334.55d5542.dc3f76bc01674c5796e4eba7d4c142c0"
-
 base_url = "https://api.instagram.com/v1/"
 
-def self_info():
 
+def self_info():
     '''
     1.create a url for self account
     2.request the data
     '''
-
     request_url = (base_url + "users/self/?access_token=%s")%(Access_Token)
-
     print 'My requested URL is :- %s'%(request_url)
     user_info = requests.get(request_url).json()
 
@@ -23,24 +22,20 @@ def self_info():
 
     if user_info['meta']['code']==200:
         if len(user_info['data']):
-
             print "Username is :- %s" %(user_info['data']['username'])
             print "Number of Followers :- %s" %(user_info['data']['counts']['follows'])
             print "Number of Peoples Followed by you :- %s"%(user_info['data']['counts']['followed_by'])
             print "Number of Posts :- %s" %(user_info['data']['counts']['media'])
-
         else:
             print "User Doesn't Exist !"
     else:
         print "Invalid Information !"
-
     return user_info
+
 
 def get_user_id(user_name):
 
-
     request_url = (base_url + "users/search?q=%s&access_token=%s") % (user_name,Access_Token)
-
     print "The requested URL is :- %s"%(request_url)
     user_info = requests.get(request_url).json()
     if user_info['meta']['code']==200:
@@ -60,7 +55,6 @@ def get_user_info(user_name):
         print "User Doesn't Exist"
         exit()
     requested_url = (base_url + "users/%s/?access_token=%s")%(user_id,Access_Token)
-
     user_info = requests.get(requested_url).json()
     if user_info['meta']['code']==200:
         if len(user_info['data']):
@@ -87,22 +81,18 @@ def get_own_post():
     return my_recent_post
 
 
-
 def dowmload_post(item):
 
     urllib.urlretrieve(item['url'] , item['image_name'])
-
     return None
 
 def download_own_posts():
-
 
     '''
     1.get the user info
     2.create url and name
     3.call download post
     '''
-
 
     requested_url = base_url + "users/self/media/recent/?access_token=%s" %Access_Token
     data = requests.get(requested_url).json()['data']
@@ -112,6 +102,7 @@ def download_own_posts():
                        'image_name': e['id'] + '.jpeg'})
     for e in images :
         dowmload_post(e)
+    print "Your Posts are Ready"
 
 def get_another_user_recent_post(user_name):
 
@@ -120,7 +111,6 @@ def get_another_user_recent_post(user_name):
     1.generate userid from search
     3.get the most recent media of the user by using endpoint
     '''
-
 
     user_id = get_user_id(user_name)
     requested_url = base_url + "users/%s/media/recent/?access_token=%s" %(user_id,Access_Token)
@@ -145,7 +135,6 @@ def get_post_id(user_name):
     user_id = get_user_id(user_name)
     requested_url = base_url + "users/%s/media/recent/?access_token=%s" %(user_id,Access_Token)
     media_id = requests.get(requested_url).json()['data'][2]['id']
-
     return  media_id
 
 def like_a_post(user_name):
@@ -155,8 +144,8 @@ def like_a_post(user_name):
     2.generate request url
     3.create parameter payload
     4.post like
-
     '''
+
     post_id = get_post_id(user_name)
     print post_id
     request_url = (base_url + 'media/%s/likes')%(post_id)
@@ -170,7 +159,6 @@ def like_a_post(user_name):
         print "Like Was Unsuccessful"
     return  post_a_like
 
-
 def post_a_comment():
 
     '''
@@ -179,13 +167,12 @@ def post_a_comment():
     3.create parameter with access token and text
     4.call the function
     '''
+
     post_id = get_own_post()
     request_url = base_url + "media/%s/comments"%(post_id)
     param ={'access_token':Access_Token , 'text':'api comment testing'}
     post_comment = requests.post(request_url,param)
     print "You Posted a Comment"
-
-
     return post_comment
 
 def get_comment(user_name):
@@ -210,10 +197,12 @@ def get_comment(user_name):
 
 
 def media_liked_by_user():
+
     '''
     1.create request url
     2.fetch the information
     '''
+
     request_url = base_url + "users/self/media/liked?access_token=%s"%(Access_Token)
     liked_media = requests.get(request_url).json()['data'][0]['caption']
     print liked_media
@@ -227,21 +216,25 @@ def tag_object_information(tag_name):
     2.create the url
     3.fetch the information
     '''
+
     request_url = base_url + "tags/%s?access_token=%s" %(tag_name,Access_Token)
     information = requests.get(request_url).json()['data']
     print information
     return information
+
 def recent_tagged_media(tag_name):
+
     '''
     1.pass a tag_name
     2.create url
     3.fetch information
-
     '''
+
     request_url = base_url + "tags/%s/media/recent?access_token=%s" %(tag_name , Access_Token)
     media = requests.get(request_url).json()['data']
     print media
     return media
+
 def search_tag_by_name(tag_name):
 
     '''
@@ -249,6 +242,7 @@ def search_tag_by_name(tag_name):
     2.create url
     3.fetch the information
     '''
+
     request_url = base_url + "tags/search?q=%s&access_token=%s" %(tag_name , Access_Token)
     tag_info = requests.get(request_url).json()['data']
     print tag_info
@@ -267,6 +261,7 @@ def get_comment_for_delete_function(user_name):
     request_url = base_url + 'media/%s/comments?access_token=%s' %(post_id,Access_Token)
     data = requests.get(request_url).json()
     return data
+
 
 def delete_negative_comment(user_name):
 
@@ -291,9 +286,7 @@ def delete_negative_comment(user_name):
                     print "Unable To Delete Comment"
             else:
                 print "Positive Comment : %s" %(comment_text)
-
             return blob.sentiment
-
             exit()
         else:
             print "No Comment"
@@ -306,8 +299,8 @@ def get_negative_percentage():
     1.get a word
     2.call for textblob
     3.evaluate
-
     '''
+
     word = raw_input("Enter A word : ")
     b = TextBlob(word)
     print b.sentiment
@@ -315,16 +308,53 @@ def get_negative_percentage():
 def get_comment_id(user_name):
 
     '''
-    1.
-
+    1.get post id
+    2.create url
+    3.fetch information
     '''
+
     post_id = get_post_id(user_name)
     request_url = base_url + 'media/%s/comments?access_token=%s' %(post_id,Access_Token)
     print request_url
     data = requests.get(request_url).json()
     print data['data'][0]['id']
-
     return data.keys()
+
+
+def draw_a_chart():
+
+    labels = 'tag1','tag2','tag3','tag4'
+    sizes = [15, 30, 45, 10]
+    explode = (0, 0, 0.1, 0)  # only "explode" the 3nd slice
+
+    fig1, ax1 = plt.subplots()
+    ax1.pie(sizes, explode=explode, labels=labels, autopct='%1.1f%%',
+            shadow=True, startangle=90)
+    ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+
+    plt.show()
+
+def get_recent_post(user_name):
+
+    user_id = get_user_id(user_name)
+    requested_url = base_url + "users/%s/media/recent/?access_token=%s" % (user_id, Access_Token)
+    posts = requests.get(requested_url).json()['data']
+    caption = []
+    for e in posts:
+        caption.append(e['caption']['text'])
+    print caption
+    print collections.Counter(caption)
+    return collections.Counter(caption)
+
+
+
+
+
+def get_hashtags():
+
+    text = "this#is#a#text"
+    print text.split('#')
+    return text.split('#')
 
 def startbot():
     '''
@@ -334,8 +364,8 @@ def startbot():
     '''
 
     print "\n"
-    print "Hey!\n****Welcome to InstaBot****\n"
-    print "Choose from Your Menu Options>>\n"
+    print "           Hey!\n****Welcome to InstaBot****\n"
+    print "Choose from Your Menu Options =>\n"
     print "a.Get your own Details"
     print "b.Get Details of Another User"
     print "c.Get my recent post"
@@ -344,12 +374,15 @@ def startbot():
     print "f.Post a Like"
     print "g.Post a Comment"
     print "h.Get Comments of User"
-    print "i.Get media Likes by user"
+    print "i.Get media Liked by user"
     print "j.Get Tag Object Information"
     print "k.Get Recent Tagged media"
     print "l.Search tag by Name"
-    print "m.Print sentiments"
+    print "m.Print sentiments and Delete Comment"
     print "n.Get negative percentage of a word"
+    print "o.Draw a chart"
+    print "p.Get Hashtags used by user"
+    print "q."
     print "n.exit\n"
 
 
@@ -365,9 +398,11 @@ def startbot():
         exit()
     if choice == "d" :
         download_own_posts()
+        exit()
     if choice == "e" :
         user_name = raw_input("Enter the UserName Of the User>>>\n")
         get_another_user_recent_post(user_name)
+        exit()
     if choice == "f" :
         user_name = raw_input("Enter the name of the User>>")
         like_a_post(user_name)
@@ -375,21 +410,26 @@ def startbot():
     if choice == "g" :
         user_name = raw_input("Enter the name of the User>>")
         post_a_comment(user_name)
+        exit()
     if choice == "h" :
         user_name = raw_input("Enter the name of the User>>")
         get_comment(user_name)
         exit()
     if choice == "i" :
         media_liked_by_user()
+        exit()
     if choice == "j" :
         tag_name = raw_input("Enter the Name Of Tag : ")
         tag_object_information(tag_name)
+        exit()
     if choice == "k" :
         tag_name = raw_input("Enter the Name Of Tag : ")
         recent_tagged_media(tag_name)
+        exit()
     if choice == "l" :
         tag_name = raw_input("Enter the Name Of Tag : ")
         search_tag_by_name(tag_name)
+        exit()
     if choice == "m" :
         user_name = raw_input("Enter the User_Name : ")
         delete_negative_comment(user_name)
@@ -398,8 +438,19 @@ def startbot():
         user_name = raw_input("Enter the name of the User>>")
         get_comment_id(user_name)
         exit()
+    if choice == "o" :
+        draw_a_chart()
+        exit()
     if choice == "x" :
         get_negative_percentage()
+        exit()
+    if choice == "p" :
+        user_name = raw_input("Enter name :")
+        get_recent_post(user_name)
+        exit()
+    if choice == "q" :
+        get_hashtags()
+        exit()
     elif choice == "z" :
         exit()
     else :
